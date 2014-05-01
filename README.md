@@ -28,6 +28,7 @@ Porting notes
 - Uses the GNU/FSF toolchain (bison, flex, make)
 - On Snow Leopard, comment out WEXTRA in Makefile (thanks, Russ).
 
-> rich $alz
->  rsalz@akamai.com
->  June,July 2013
+> rich $alz<br/>
+> rsalz@akamai.com<br/>
+> June,July 2013
+
