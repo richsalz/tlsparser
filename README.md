@@ -18,7 +18,7 @@ Running a diff between rfc5246.txt and rfc5246.original will show the
 changes I had to make to get the samples to parse.
 
 Things to do
-============
+------------
 
 - The doxygen stuff needs work.  Not sure if that's worth it.
 
