@@ -10,20 +10,24 @@ think are some errors in that section, based on uses of the language
 in the rest of the RFC.  Unfortunately, I don't remember most of them.
 
 The one group I do remember, has to do with the choices in a variant:
-    - There can be more than one or two case tags.
-    - There can be more than a simple "type" name in a choice, you can
-      have multiple fields and crypto markers, etc.
-    - There is no clean way to indicate "no content", which would be helpful
+- There can be more than one or two case tags.
+- There can be more than a simple "type" name in a choice, you can have multiple fields and crypto markers, etc.
+- There is no clean way to indicate "no content", which would be helpful
 
 Running a diff between rfc5246.txt and rfc5246.original will show the
 changes I had to make to get the samples to parse.
 
-Things to do:
-    - The doxygen stuff needs work.  Not sure if that's worth it.
+Things to do
+============
 
-Porting notes:
-    - On Snow Leopard, comment out WEXTRA in Makefile (thanks, Russ).
+- The doxygen stuff needs work.  Not sure if that's worth it.
 
---rich $alz
-  rsalz@akamai.com
-  June,July 2013
+Porting notes
+-------------
+
+- Uses the GNU/FSF toolchain (bison, flex, make)
+- On Snow Leopard, comment out WEXTRA in Makefile (thanks, Russ).
+
+> rich $alz
+>  rsalz@akamai.com
+>  June,July 2013
