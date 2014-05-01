@@ -30,8 +30,6 @@ static bool dupsok = false;
 static const char* infile = "<stdin>";
 static const char UNNAMED[] = "<unnamed>";
 static Symtab table;
-static const char version[] =
-    "$Id: gram.y,v 1.21 2014/04/10 02:38:43 rsalz Exp $";
 
 static void yyerror(const char* cp);
 static void intern(const string* name, const Node* np, bool external=false);
