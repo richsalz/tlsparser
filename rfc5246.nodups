@@ -1,0 +1,451 @@
+//4.3.  Vectors
+
+      opaque Datum[3];      /* three uninterpreted bytes */
+      Datum Data[9];        /* 3 consecutive 3 byte vectors */
+
+      opaque mandatory<300..400>;
+            /* length field is 2 bytes, cannot be empty */
+      uint16 longer<0..800>;
+            /* zero to 400 16-bit unsigned integers */
+
+//4.4.  Numbers
+//
+//   The following numeric types are predefined.
+//
+//      uint8 uint16[2];
+//      uint8 uint24[3];
+//      uint8 uint32[4];
+//      uint8 uint64[8];
+
+//4.5.  Enumerateds
+
+      enum { red(3), blue(5), white(7) } Color;
+
+      enum { sweet(1), sour(2), bitter(4), (32000) } Taste;
+
+// Not supported by the parser:
+//      Color color = Color.blue;     /* overspecified, legal */
+//      Color color = blue;           /* correct, type implicit */
+
+      enum { low, medium, high } Amount;
+
+//4.6.1.  Variants
+
+      enum { apple, orange, banana } VariantTag;
+
+      struct {
+          uint16 number;
+          opaque string<0..10>; /* variable length */
+      } V1;
+
+      struct {
+          uint32 number;
+          opaque string[10];    /* fixed length */
+      } V2;
+
+      struct {
+          select (VariantTag) { /* value of selector is implicit */
+              case apple:
+                V1;   /* VariantBody, tag = apple */
+              case orange:
+              case banana:
+                V2;   /* VariantBody, tag = orange or banana */
+          } variant_body;       /* optional label on variant */
+      } VariantRecord;
+
+//4.7   Cryptographic Variants
+
+      struct {
+         SignatureAndHashAlgorithm algorithm;
+         opaque signature<0..2^16-1>;
+      } DigitallySigned;
+
+      stream-ciphered struct {
+          uint8 field1;
+          uint8 field2;
+          digitally-signed struct {
+            uint8 field3<0..255>;
+            uint8 field4;
+          };
+      } UserType;
+
+//4.8.  Constants
+
+      struct {
+          uint8 f1;
+          uint8 f2;
+      } Example1;
+
+// Not supported by the parser:
+//      Example1 ex1 = {1, 4};  /* assigns f1 = 1, f2 = 4 */
+//6.1.  Connection States
+
+      enum { server, client } ConnectionEnd;
+
+      enum { tls_prf_sha256 } PRFAlgorithm;
+
+      enum { null, rc4, 3des, aes }
+        BulkCipherAlgorithm;
+
+      enum { stream, block, aead } CipherType;
+
+      enum { null, hmac_md5, hmac_sha1, hmac_sha256,
+           hmac_sha384, hmac_sha512} MACAlgorithm;
+
+      enum { null(0), (255) } CompressionMethod;
+
+      /* The algorithms specified in CompressionMethod, PRFAlgorithm,
+         BulkCipherAlgorithm, and MACAlgorithm may be added to. */
+
+      struct {
+          ConnectionEnd          entity;
+          PRFAlgorithm           prf_algorithm;
+          BulkCipherAlgorithm    bulk_cipher_algorithm;
+          CipherType             cipher_type;
+          uint8                  enc_key_length;
+          uint8                  block_length;
+          uint8                  fixed_iv_length;
+          uint8                  record_iv_length;
+          MACAlgorithm           mac_algorithm;
+          uint8                  mac_length;
+          uint8                  mac_key_length;
+          CompressionMethod      compression_algorithm;
+          opaque                 master_secret[48];
+          opaque                 client_random[32];
+          opaque                 server_random[32];
+      } SecurityParameters;
+
+//6.2.1.  Fragmentation
+
+      struct {
+          uint8 major;
+          uint8 minor;
+      } ProtocolVersion;
+
+      enum {
+          change_cipher_spec(20), alert(21), handshake(22),
+          application_data(23), (255)
+      } ContentType;
+
+      struct {
+          ContentType type;
+          ProtocolVersion version;
+          uint16 length;
+          opaque fragment[TLSPlaintext.length];
+      } TLSPlaintext;
+
+//6.2.2.  Record Compression and Decompression
+
+      struct {
+          ContentType type;       /* same as TLSPlaintext.type */
+          ProtocolVersion version;/* same as TLSPlaintext.version */
+          uint16 length;
+          opaque fragment[TLSCompressed.length];
+      } TLSCompressed;
+
+//6.2.3.  Record Payload Protection
+
+      struct {
+          ContentType type;
+          ProtocolVersion version;
+          uint16 length;
+          select (SecurityParameters.cipher_type) {
+              case stream: GenericStreamCipher;
+              case block:  GenericBlockCipher;
+              case aead:   GenericAEADCipher;
+          } fragment;
+      } TLSCiphertext;
+
+//6.2.3.1.  Null or Standard Stream Cipher
+
+      stream-ciphered struct {
+          opaque content[TLSCompressed.length];
+          opaque MAC[SecurityParameters.mac_length];
+      } GenericStreamCipher;
+
+//6.2.3.2.  CBC Block Cipher
+
+      struct {
+          opaque IV[SecurityParameters.record_iv_length];
+          block-ciphered struct {
+              opaque content[TLSCompressed.length];
+              opaque MAC[SecurityParameters.mac_length];
+              uint8 padding[GenericBlockCipher.padding_length];
+              uint8 padding_length;
+          };
+      } GenericBlockCipher;
+
+//6.2.3.3.  AEAD Ciphers
+
+      struct {
+         opaque nonce_explicit[SecurityParameters.record_iv_length];
+         aead-ciphered struct {
+             opaque content[TLSCompressed.length];
+         };
+      } GenericAEADCipher;
+
+//7.1.  Change Cipher Spec Protocol
+
+      struct {
+          enum { change_cipher_spec(1), (255) } type;
+      } ChangeCipherSpec;
+
+//7.2.  Alert Protocol
+
+      enum { warning(1), fatal(2), (255) } AlertLevel;
+
+      enum {
+          close_notify(0),
+          unexpected_message(10),
+          bad_record_mac(20),
+          decryption_failed_RESERVED(21),
+          record_overflow(22),
+          decompression_failure(30),
+          handshake_failure(40),
+          no_certificate_RESERVED(41),
+          bad_certificate(42),
+          unsupported_certificate(43),
+          certificate_revoked(44),
+          certificate_expired(45),
+          certificate_unknown(46),
+          illegal_parameter(47),
+          unknown_ca(48),
+          access_denied(49),
+          decode_error(50),
+          decrypt_error(51),
+          export_restriction_RESERVED(60),
+          protocol_version(70),
+          insufficient_security(71),
+          internal_error(80),
+          user_canceled(90),
+          no_renegotiation(100),
+          unsupported_extension(110),
+          (255)
+      } AlertDescription;
+
+      struct {
+          AlertLevel level;
+          AlertDescription description;
+      } Alert;
+
+//7.4.  Handshake Protocol
+
+      enum {
+          hello_request(0), client_hello(1), server_hello(2),
+          certificate(11), server_key_exchange (12),
+          certificate_request(13), server_hello_done(14),
+          certificate_verify(15), client_key_exchange(16),
+          finished(20), (255)
+      } HandshakeType;
+
+      struct {
+          HandshakeType msg_type;    /* handshake type */
+          uint24 length;             /* bytes in message */
+          select (HandshakeType) {
+              case hello_request:       HelloRequest;
+              case client_hello:        ClientHello;
+              case server_hello:        ServerHello;
+              case certificate:         Certificate;
+              case server_key_exchange: ServerKeyExchange;
+              case certificate_request: CertificateRequest;
+              case server_hello_done:   ServerHelloDone;
+              case certificate_verify:  CertificateVerify;
+              case client_key_exchange: ClientKeyExchange;
+              case finished:            Finished;
+          } body;
+      } Handshake;
+
+//7.4.1.1.  Hello Request
+
+      struct { } HelloRequest;
+
+//7.4.1.2.  Client Hello
+
+         struct {
+             uint32 gmt_unix_time;
+             opaque random_bytes[28];
+         } Random;
+
+      opaque SessionID<0..32>;
+
+      uint8 CipherSuite[2];    /* Cryptographic suite selector */
+
+      struct {
+          ProtocolVersion client_version;
+          Random random;
+          SessionID session_id;
+          CipherSuite cipher_suites<2..2^16-1>; //?? Should this be 1.. ??//
+          CompressionMethod compression_methods<1..2^8-1>;
+          select (extensions_present) {
+              case false:
+                  ;
+              case true:
+                  Extension extensions<0..2^16-1>;
+          };
+      } ClientHello;
+
+//7.4.1.3.  Server Hello
+
+      struct {
+          ProtocolVersion server_version;
+          Random random;
+          SessionID session_id;
+          CipherSuite cipher_suite;
+          CompressionMethod compression_method;
+          select (extensions_present) {
+              case false:
+                  ;
+              case true:
+                  Extension extensions<0..2^16-1>;
+          };
+      } ServerHello;
+
+//7.4.1.4.  Hello Extensions
+
+      struct {
+          ExtensionType extension_type;
+          opaque extension_data<0..2^16-1>;
+      } Extension;
+
+      enum {
+          signature_algorithms(13), (65535)
+      } ExtensionType;
+
+//7.4.1.4.1.  Signature Algorithms
+
+      enum {
+          none(0), md5(1), sha1(2), sha224(3), sha256(4), sha384(5),
+          sha512(6), (255)
+      } HashAlgorithm;
+
+      enum { anonymous(0), rsa(1), dsa(2), ecdsa(3), (255) }
+        SignatureAlgorithm;
+
+      struct {
+            HashAlgorithm hash;
+            SignatureAlgorithm signature;
+      } SignatureAndHashAlgorithm;
+
+      SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-1>; //?? Should this be 1.. ??//
+
+//7.4.2.  Server Certificate
+
+      opaque ASN1Cert<1..2^24-1>;
+
+      struct {
+          ASN1Cert certificate_list<0..2^24-1>;
+      } Certificate;
+
+//7.4.3.  Server Key Exchange Message
+
+      enum { dhe_dss, dhe_rsa, dh_anon, rsa, dh_dss, dh_rsa
+            /* may be extended, e.g., for ECDH -- see [TLSECC] */
+           } KeyExchangeAlgorithm;
+
+      struct {
+          opaque dh_p<1..2^16-1>;
+          opaque dh_g<1..2^16-1>;
+          opaque dh_Ys<1..2^16-1>;
+      } ServerDHParams;     /* Ephemeral DH parameters */
+
+//7.4.4.  Certificate Request
+
+      enum {
+          rsa_sign(1), dss_sign(2), rsa_fixed_dh(3), dss_fixed_dh(4),
+          rsa_ephemeral_dh_RESERVED(5), dss_ephemeral_dh_RESERVED(6),
+          fortezza_dms_RESERVED(20), (255)
+      } ClientCertificateType;
+
+      opaque DistinguishedName<1..2^16-1>;
+
+      struct {
+          ClientCertificateType certificate_types<1..2^8-1>;
+          SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-1>; //?? Should this be 1.. ??//
+          DistinguishedName certificate_authorities<0..2^16-1>;
+      } CertificateRequest;
+
+//7.4.5.  Server Hello Done
+
+      struct { } ServerHelloDone;
+
+//7.4.7.  Client Key Exchange Message
+
+      struct {
+          select (KeyExchangeAlgorithm) {
+              case rsa:
+                  EncryptedPreMasterSecret;
+              case dhe_dss:
+              case dhe_rsa:
+              case dh_dss:
+              case dh_rsa:
+              case dh_anon:
+                  ClientDiffieHellmanPublic;
+          } exchange_keys;
+      } ClientKeyExchange;
+
+//7.4.7.1.  RSA-Encrypted Premaster Secret Message
+
+      struct {
+          ProtocolVersion client_version;
+          opaque random[46];
+      } PreMasterSecret;
+
+      struct {
+          public-key-encrypted PreMasterSecret pre_master_secret;
+      } EncryptedPreMasterSecret;
+
+//7.4.7.2.  Client Diffie-Hellman Public Value
+
+      enum { implicit, explicit } PublicValueEncoding;
+
+      opaque dh_Yc<1..2^16-1>;
+
+      struct {
+          select (PublicValueEncoding) {
+              case implicit: ;
+              case explicit: dh_Yc;
+          } dh_public;
+      } ClientDiffieHellmanPublic;
+
+//7.4.8.  Certificate Verify
+
+      struct {
+           digitally-signed struct {
+               opaque handshake_messages[handshake_messages_length];
+           };
+      } CertificateVerify;
+
+//7.4.9.  Finished
+
+      struct {
+          opaque verify_data[verify_data_length];
+      } Finished;
+
+//A.4.1.  Hello Messages
+
+   SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-1>; //? Should this be 1.. ??//
+
+//A.4.2.  Server Authentication and Key Exchange Messages
+
+   digitally-signed struct {
+       opaque client_random[32];
+       opaque server_random[32];
+       ServerDHParams params;
+   } SignedDHParams;
+
+   struct {
+       select (KeyExchangeAlgorithm) {
+           case dh_anon:
+               ServerDHParams params;
+           case dhe_dss:
+           case dhe_rsa:
+               ServerDHParams params; //?? Is this correct -- ServerDHParams is included twice??//
+               SignedDHParams signed_params;
+           case rsa:
+           case dh_dss:
+           case dh_rsa:
+               ;
+              /* message is omitted for rsa, dh_dss, and dh_rsa */
+           /* may be extended, e.g., for ECDH -- see [TLSECC] */
+        };
+   } ServerKeyExchange;

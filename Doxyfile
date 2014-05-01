@@ -1,0 +1,30 @@
+## RFC5246 Data definition language parser
+## Rich Salz, rsalz@akamai.com, June 2013.
+
+## Only the *differences* from the default config are here.
+
+ALIASES               += "TODO=@todo"
+PROJECT_NAME           = "tlsgrammar"
+PROJECT_NUMBER         = 2
+OUTPUT_DIRECTORY       = doxy
+BUILTIN_STL_SUPPORT    = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_ANON_NSPACES   = YES
+QUIET                  = YES
+FILE_PATTERNS          = *.doxy *.hpp *.y *.l
+HTML_HEADER            =
+SEARCHENGINE           = NO
+GENERATE_LATEX         = NO
+PDF_HYPERLINKS         = NO
+USE_PDFLATEX           = NO
+COMPACT_LATEX          = YES
+LATEX_BATCHMODE        = YES
+PAPER_TYPE             = letter
+DOT_TRANSPARENT        = YES
+SHOW_DIRECTORIES       = YES
+WARN_NO_PARAMDOC       = YES
+#SHOW_FILES             = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES

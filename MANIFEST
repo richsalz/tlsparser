@@ -1,0 +1,13 @@
+File                            Description
+-------------------------------------------------------------
+MANIFEST                 	This shipping list
+Makefile                        Makefile
+README                   	Internal notes
+Doxyfile                 	Doxygen control file (doesn't quite work yet)
+gram.y                   	Grammar
+lex.l                    	Lexer
+nodes.hpp                	Parsed node structures
+rfc5246.nodups           	A version with duplicate items removed
+rfc5246.original         	Original samples from RFC 5246
+rfc5246.txt              	Edited/fixed samples from RFC 5246
+test.py                  	Test suite and driver
