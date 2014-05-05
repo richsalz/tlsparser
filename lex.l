@@ -59,7 +59,7 @@ $nodebug             { setyydebug(0); }
     yylval.num = atoi(yytext);
     return tNUMBER;
 }
-2^{NUM}-1 {
+2^{NUM}-[1-9] {
     /* A hack to recognize 2^16-1 for example */
     int shift = atoi(yytext + 2);
     if (shift < 1 || shift > 32) {
@@ -70,8 +70,11 @@ $nodebug             { setyydebug(0); }
         yylval.num = 0;
         vyyerror("Bad exponent");
     }
-    else
-        yylval.num = (1 << shift) - 1;
+    else {
+        const char* cp = strchr(yytext, '-');
+        int offset = atoi(++cp);
+        yylval.num = (1 << shift) - offset;
+    }
     return tNUMBER;
 }
 

@@ -270,6 +270,8 @@
 
       uint8 CipherSuite[2];    /* Cryptographic suite selector */
 
+      enum { false, true } extensions_present;
+
       struct {
           ProtocolVersion client_version;
           Random random;
@@ -326,7 +328,7 @@
             SignatureAlgorithm signature;
       } SignatureAndHashAlgorithm;
 
-      SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-1>; //?? Should this be 1.. ??//
+      SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-2>;
 
 //7.4.2.  Server Certificate
 
@@ -360,7 +362,7 @@
 
       struct {
           ClientCertificateType certificate_types<1..2^8-1>;
-          SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-1>; //?? Should this be 1.. ??//
+          SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-2>;
           DistinguishedName certificate_authorities<0..2^16-1>;
       } CertificateRequest;
 
@@ -423,7 +425,7 @@
 
 //A.4.1.  Hello Messages
 
-   SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-1>; //? Should this be 1.. ??//
+   SignatureAndHashAlgorithm supported_signature_algorithms<2..2^16-2>;
 
 //A.4.2.  Server Authentication and Key Exchange Messages
 
