@@ -1,5 +1,6 @@
 File                            Description
 -------------------------------------------------------------
+LICENSE                         Software license (ASF v2)
 MANIFEST                 	This shipping list
 Makefile                        Makefile
 README                   	Internal notes
