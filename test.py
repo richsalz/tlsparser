@@ -17,21 +17,22 @@ tests = (
   ),
   (
     "uint16 f[0];\n",
-    "INFILE:1: error near ``;'': ``f'' size is not positive, 0\n"
+    "INFILE:1: error near ``;'': ``f'' size (0) is not positive\n"
   ),
   (
     "uint16 f[2^33-1];\n",
     "INFILE:1: error near ``2^33-1'': Exponent out of range\n"
-    "INFILE:1: error near ``;'': ``f'' size is not positive, 0\n"
+    "INFILE:1: error near ``;'': ``f'' size (0) is not positive\n"
   ),
   (
     "uint16 f[2^3-1];\n",
     "INFILE:1: error near ``2^3-1'': Bad exponent\n"
-    "INFILE:1: error near ``;'': ``f'' size is not positive, 0\n"
+    "INFILE:1: error near ``;'': ``f'' size (0) is not positive\n"
   ),
   (
     "uint16 f[2^3-2];\n",
-    "INFILE:1: error near ``^'': syntax error, unexpected $undefined, expecting ']'\n"
+    "INFILE:1: error near ``2^3-2'': Bad exponent\n"
+    "INFILE:1: error near ``;'': ``f'' size (0) is not positive\n"
   ),
   (
     "enum { a, a } b;\n",

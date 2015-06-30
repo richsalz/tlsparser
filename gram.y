@@ -112,7 +112,7 @@ simple
     }
     | primitive tID '[' tNUMBER ']' ';' {
         if ($4 <= 0)
-            vyyerror("``%s'' size is not positive, %d", $2->c_str(), $4);
+            vyyerror("``%s'' size (%d) is not positive", $2->c_str(), $4);
         $$ = new Simple($2, $1);
         intern($2, $$);
     }
