@@ -238,6 +238,13 @@ external_choices
             $1->insert(*$3, $5);
         $$ = $1;
     }
+    | external_choices ',' tID '(' tNUMBER tDOTDOT tNUMBER ')' {
+	if ($3->find("reserved") == string::npos
+	&& $3->find("RESERVED") == string::npos)
+	    vyyerror("Enum range for ``%s'' for non-reserved name",
+		     $3->c_str());
+	$$ = $1;
+    }
     ;
 
 opt_size

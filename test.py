@@ -51,8 +51,16 @@ tests = (
     "INFILE:1: error near ``;'': ``f'' size (0) is not positive\n"
   ),
   (
-    "enum { a, a } b;\n",
+    "enum { a, a } b;",
     "INFILE:1: error near ``a'': Duplicate ``a'' in enum\n"
+  ),
+  (
+    "enum { c(1), a(1..3) } b;",
+    "INFILE:1: error near ``)'': Enum range for ``a'' for non-reserved name\n"
+  ),
+  (
+    "enum { c(1), reserved(1..3) } b;",
+    ""
   ),
   (
     "enum { a(1), b } c;",
